@@ -9,9 +9,20 @@ from subprocess import call
 EDITOR = os.environ.get('EDITOR','vim')
 REGEX  = re.compile("^\s*(\w+)\s+(.+)", re.MULTILINE)
 
+MITMFILE_PATH = '.mitmproxy'
+
+MITMFILE = f"{MITMFILE_PATH}/Mitmfile"
+
+DEFAULT_MITMFILE_CONTENT = '''
+view_filter !~u /static/
+
+### login api
+#map_local |/api/login|.mitmproxy/login.json
+'''
+
 class MitmFile:
     def __init__(self):
-        self.file = os.path.expanduser('~/.mitmproxy/mitmfile')
+        self.file = MITMFILE
         self.touched_options : typing.Dict[str, typing.Any] = {}
 
     def load(self, loader):
@@ -69,6 +80,12 @@ class MitmFile:
 
     @command.command("mitmfile.edit")
     def edit(self) -> None:
+        if not os.path.exists(MITMFILE_PATH):
+            os.makedirs(MITMFILE_PATH)
+        if not os.path.exists(self.file):
+            with open(self.file, 'w+') as f:
+                f.write(DEFAULT_MITMFILE_CONTENT)
+
         console_master = ctx.master.addons.get('consoleaddon').master
         with console_master.uistopped():
             call([EDITOR, self.file])
