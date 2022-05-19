@@ -7,12 +7,13 @@ with this plugin, I can define and load mitmproxy configs from .mitmproxy/Mitmfi
 projectA/.mitmproxy/Mitmfile
 
 ```ini
+## filter static request
 view_filter !~u /static/
 
-
+## report api
 map_local |/api/report/17/timeline|.mitmproxy/timeline.json
-map_local |/api/report/17/performance/rank|.mitmproxy/rank.json
 map_local |/api/report/17$|.mitmproxy/report.json
+map_remote |/api/report/17/performance/rank|http://qa.example.com/rank.json
 
 ## lives
 map_local |/api/courses/.+/activities/lives|.mitmproxy/lives.json
