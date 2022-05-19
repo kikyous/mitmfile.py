@@ -19,11 +19,9 @@ map_remote |/api/report/17/performance/rank|http://qa.example.com/rank.json
 map_local |/api/courses/.+/activities/lives|.mitmproxy/lives.json
 ```
 
-when you run `mitmproxy` in projectA, It will load .mitmproxy/Mitmfile and apply all definded options.
-
-you can use all mitmproxy config options in Mitmfile with format `key value`
-
-comments start with '#'
+* when you run `mitmproxy` in projectA, It will load .mitmproxy/Mitmfile and apply all definded options.
+* you can use (almost) all mitmproxy config options in Mitmfile with `key value` format.
+* comments start with '#'
 
 
 ## Edit
