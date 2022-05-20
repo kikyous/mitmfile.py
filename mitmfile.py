@@ -5,6 +5,7 @@ import os
 from mitmproxy import command
 from mitmproxy import ctx
 from subprocess import call
+from collections.abc import Sequence
 
 EDITOR = os.environ.get('EDITOR','vim')
 REGEX  = re.compile("^\s*(\w+)\s+(.+)", re.MULTILINE)
@@ -49,7 +50,7 @@ class MitmFile:
         for k,v in maps:
             if k in ctx.options:
                 value = v.strip()
-                if self.get_option_specs(k) in (typing.Sequence[str],):
+                if self.get_option_specs(k) in (Sequence[str],):
                     set_list(k, value)
                 elif self.get_option_specs(k) in (str, typing.Optional[str]):
                     option_maps[k] = value
