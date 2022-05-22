@@ -11,9 +11,7 @@ EDITOR = os.environ.get('EDITOR','vim')
 REGEX  = re.compile("^\s*(\w+)\s+(.+)", re.MULTILINE)
 
 MITMFILE_PATH = '.mitmproxy'
-
 MITMFILE = f"{MITMFILE_PATH}/Mitmfile"
-
 DEFAULT_MITMFILE_CONTENT = '''
 view_filter !~u /static/
 
@@ -33,9 +31,11 @@ class MitmFile:
             default = None,
             help = "Load a mitmfile",
         )
+
+    def running(self):
         self.load_file()
-    
-    def get_option_specs(self, option: str):
+
+    def get_option_spec(self, option: str):
         return ctx.options._options[option].typespec
 
     def parse(self, content: str):
@@ -47,19 +47,20 @@ class MitmFile:
                 option_maps[key] = []
             option_maps[key].append(value)
 
-        for k,v in maps:
+        for k, v in maps:
             if k in ctx.options:
                 value = v.strip()
-                if self.get_option_specs(k) in (Sequence[str],):
+                option_spec = self.get_option_spec(k)
+                if option_spec in (Sequence[str],):
                     set_list(k, value)
-                elif self.get_option_specs(k) in (str, typing.Optional[str]):
+                elif option_spec in (str, typing.Optional[str]):
                     option_maps[k] = value
-                elif self.get_option_specs(k) in (int, typing.Optional[int]):
+                elif option_spec in (int, typing.Optional[int]):
                     option_maps[k] = int(value)
-                elif self.get_option_specs(k) in (bool, typing.Optional[bool]):
+                elif option_spec in (bool, typing.Optional[bool]):
                     option_maps[k] = False if value in ("False", "false", "f", "F", "0", "no", "n", "NO", "N") else True
         return option_maps
-    
+
     def apply(self, options: typing.Dict[str, typing.Any]):
         for k in options.keys():
             if not k in self.touched_options:
@@ -75,7 +76,7 @@ class MitmFile:
                 ctx.options.update(**{k: value})
             except:
                 pass
-    
+
     def load_file(self):
         if not os.path.exists(self.file):
             return
