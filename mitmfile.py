@@ -2,13 +2,15 @@ import typing
 import re
 import os
 
+from collections import defaultdict
+from collections.abc import Sequence
 from mitmproxy import command
 from mitmproxy import ctx
 from subprocess import call
-from collections.abc import Sequence
 
 EDITOR = os.environ.get('EDITOR','vim')
 REGEX  = re.compile("^\s*(\w+)\s+(.+)", re.MULTILINE)
+FALSELY = ("False", "false", "f", "F", "0", "no", "n", "NO", "N")
 
 MITMFILE_PATH = '.mitmproxy'
 MITMFILE = f"{MITMFILE_PATH}/Mitmfile"
@@ -18,6 +20,19 @@ view_filter !~u /static/
 ### login api
 #map_local |/api/login|.mitmproxy/login.json
 '''
+
+def parse_primitive_option(value, option_spec):
+    if option_spec in (str, typing.Optional[str]):
+        return value
+    elif option_spec in (int, typing.Optional[int]):
+        return int(value)
+    elif option_spec in (float, typing.Optional[float]):
+        return float(value)
+    elif option_spec in (bool, typing.Optional[bool]):
+        return value not in FALSELY
+
+def get_option_spec(option: str):
+    return ctx.options._options[option].typespec
 
 class MitmFile:
     def __init__(self):
@@ -35,31 +50,20 @@ class MitmFile:
     def running(self):
         self.load_file()
 
-    def get_option_spec(self, option: str):
-        return ctx.options._options[option].typespec
-
     def parse(self, content: str):
-        maps = REGEX.findall(content)
-        option_maps = {}
+        option_maps = REGEX.findall(content)
+        parsed_option_maps = defaultdict(list)
 
-        def set_list(key, value):
-            if key not in option_maps:
-                option_maps[key] = []
-            option_maps[key].append(value)
-
-        for k, v in maps:
+        for k, v in option_maps:
             if k in ctx.options:
                 value = v.strip()
-                option_spec = self.get_option_spec(k)
-                if option_spec in (Sequence[str],):
-                    set_list(k, value)
-                elif option_spec in (str, typing.Optional[str]):
-                    option_maps[k] = value
-                elif option_spec in (int, typing.Optional[int]):
-                    option_maps[k] = int(value)
-                elif option_spec in (bool, typing.Optional[bool]):
-                    option_maps[k] = False if value in ("False", "false", "f", "F", "0", "no", "n", "NO", "N") else True
-        return option_maps
+                option_spec = get_option_spec(k)
+                if typing.get_origin(option_spec) is Sequence:
+                    option_spec = typing.get_args(option_spec)[0]
+                    parsed_option_maps[k].append(parse_primitive_option(value, option_spec))
+                else:
+                    parsed_option_maps[k] = parse_primitive_option(value, option_spec)
+        return parsed_option_maps
 
     def apply(self, options: typing.Dict[str, typing.Any]):
         for k in options.keys():
