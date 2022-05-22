@@ -27,6 +27,9 @@ map_local |/api/courses/.+/activities/lives|.mitmproxy/lives.json
 ## Edit
 there is a `mitmfile.edit` command, which launch EDITOR to edit loaded Mitmfile file, you can do some modify, when editor exited, Mitmfile is automatic reloaded.
 
+## Requirements
+python 3.9+, mitmproxy 8.1.0+
+
 ## Recomend config
 Automatic load this plugin
 ```shell
