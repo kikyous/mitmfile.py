@@ -9,7 +9,7 @@ from mitmproxy import ctx
 from subprocess import call
 
 EDITOR = os.environ.get('EDITOR','vim')
-REGEX  = re.compile("^\s*(\w+)\s+(.+)", re.MULTILINE)
+REGEX  = re.compile(r'^\s*(\w+)\s+(.+)', re.MULTILINE)
 FALSELY = ("False", "false", "f", "F", "0", "no", "n", "NO", "N")
 
 MITMFILE_PATH = '.mitmproxy'
