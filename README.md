@@ -15,6 +15,9 @@ map_local |/api/report/17/timeline|.mitmproxy/timeline.json
 map_local |/api/report/17$|.mitmproxy/report.json
 map_remote |/api/report/17/performance/rank|http://qa.example.com/rank.json
 
+## sleep request 4 seconds (load sleep.py in global config)
+sleep |/api/report/17/timeline|4
+
 ## lives
 map_local |/api/courses/.+/activities/lives|.mitmproxy/lives.json
 ```
