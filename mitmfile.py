@@ -74,7 +74,6 @@ class MitmFile:
             value = options.get(k)
             if isinstance(value, list):
                 value.extend(origin_value)
-                value = list(set(value))
             value = value or origin_value
             try:
                 ctx.options.update(**{k: value})
