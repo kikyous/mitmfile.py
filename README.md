@@ -55,3 +55,11 @@ $ cat ~/.gitignore_global
 .DS_Store
 .mitmproxy
 ```
+
+
+## Tip
+if you want edit Mitmfile in a external editor, it will not able to reload automatically, in this case you can use a file listener such as nodemon to reload the program.
+
+```bash
+nodemon --signal SIGHUP --exec mitmdump --watch .mitmproxy/Mitmfile
+```
